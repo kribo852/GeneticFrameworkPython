@@ -1,6 +1,7 @@
 import habitat
 import random
 import math
+import time
 
 #A example program that produces a electronic network of resistors.
 #The goal is to combine the given resistors into a network with the wanted
@@ -38,12 +39,28 @@ def mutate(genome):
 
 #print a solution
 def output(genome):
+  maximum_number_of_resistors = max(genome) 
+  for i in range(len(genome)):
+    line = "|-"
+    for j in range(maximum_number_of_resistors):
+      if j < genome[i]:
+        line += "Ω"
+      else:
+        line += "-"
+    print(line + "-|");
+  
   print("result: "+ str(genome))
   print("score: " + str(evaluate(genome)))
   print("---------")
   
 
 #evaluate a solution to compare it to other solutions
+# this function is divided into two parts. Firstly, if the difference
+# between the wanted and measured resistance is bigger than the tolerance,
+# then return the negative difference -abs(resistance-WANTED).
+# Otherwise, if the difference is within the tolerance,
+# then return 1/ the number of used resistors, so that fewer resistors gives a
+# higher score.
 def evaluate(genome):
   resistance = calculate_resistance(genome)
   if(abs(resistance-WANTED_OHM) > WANTED_OHM*TOLERANCE):
@@ -61,6 +78,10 @@ def calculate_resistance(genome):
 def sum_of_resistors(genome):  
   return sum(genome)
 
+def finishFunction():
+  start_time = time.time()
+  return lambda genome: time.time() - start_time > 16
+
 
 #run the algorithm
-habitat.run(init, mutate, output, evaluate)
+habitat.run(init, mutate, output, evaluate, stop_condition=finishFunction())
